@@ -33,7 +33,6 @@ export class CountryDetectionService {
     this.currentCountryInfo = countryInfo;
     this.cache.set('current', countryInfo);
     
-    console.log(`🌍 Country set to: ${countryInfo.countryCode} (${countryInfo.countryName})`);
     return countryInfo;
   }
 
@@ -50,18 +49,16 @@ export class CountryDetectionService {
       
       const countryCode = locale.split('-')[1] || 'US';
       
-      console.log(`🌍 Browser locale detected: ${locale} → Country: ${countryCode}`);
       return this.createCountryInfo(countryCode.toUpperCase());
     }
     
-    console.log('🌍 Using default country: US');
     return this.defaultCountryInfo;
   }
 
   /**
    * Get country info by country code
    */
-  public getCountryInfo(countryCode?: string): CountryInfo {
+  getCountryInfo(countryCode?: string): CountryInfo {
     if (countryCode) {
       const upperCode = countryCode.toUpperCase();
       return this.createCountryInfo(upperCode);
@@ -110,7 +107,106 @@ export class CountryDetectionService {
       'CH': 'Switzerland',
       'SE': 'Sweden',
       'NO': 'Norway',
-      'DK': 'Denmark'
+      'DK': 'Denmark',
+      'PK': 'Pakistan',
+      'ID': 'Indonesia',
+      'BD': 'Bangladesh',
+      'NG': 'Nigeria',
+      'TR': 'Turkey',
+      'IR': 'Iran',
+      'TH': 'Thailand',
+      'VN': 'Vietnam',
+      'PH': 'Philippines',
+      'ET': 'Ethiopia',
+      'EG': 'Egypt',
+      'ZA': 'South Africa',
+      'AR': 'Argentina',
+      'UA': 'Ukraine',
+      'PL': 'Poland',
+      'UZ': 'Uzbekistan',
+      'MY': 'Malaysia',
+      'AF': 'Afghanistan',
+      'SA': 'Saudi Arabia',
+      'PE': 'Peru',
+      'AO': 'Angola',
+      'GH': 'Ghana',
+      'YE': 'Yemen',
+      'NP': 'Nepal',
+      'VE': 'Venezuela',
+      'MG': 'Madagascar',
+      'CM': 'Cameroon',
+      'CI': 'Ivory Coast',
+      'NE': 'Niger',
+      'LK': 'Sri Lanka',
+      'BF': 'Burkina Faso',
+      'ML': 'Mali',
+      'CL': 'Chile',
+      'MW': 'Malawi',
+      'RO': 'Romania',
+      'KZ': 'Kazakhstan',
+      'ZM': 'Zambia',
+      'SY': 'Syria',
+      'SO': 'Somalia',
+      'GT': 'Guatemala',
+      'SN': 'Senegal',
+      'TD': 'Chad',
+      'TN': 'Tunisia',
+      'ZW': 'Zimbabwe',
+      'GN': 'Guinea',
+      'RW': 'Rwanda',
+      'BJ': 'Benin',
+      'BI': 'Burundi',
+      'TZ': 'Tanzania',
+      'HT': 'Haiti',
+      'AZ': 'Azerbaijan',
+      'AT': 'Austria',
+      'RS': 'Serbia',
+      'TG': 'Togo',
+      'SL': 'Sierra Leone',
+      'HK': 'Hong Kong',
+      'LY': 'Libya',
+      'JO': 'Jordan',
+      'PG': 'Papua New Guinea',
+      'ER': 'Eritrea',
+      'UY': 'Uruguay',
+      'MN': 'Mongolia',
+      'AM': 'Armenia',
+      'JM': 'Jamaica',
+      'QA': 'Qatar',
+      'AL': 'Albania',
+      'PR': 'Puerto Rico',
+      'LT': 'Lithuania',
+      'NA': 'Namibia',
+      'GM': 'Gambia',
+      'BW': 'Botswana',
+      'GA': 'Gabon',
+      'LS': 'Lesotho',
+      'GW': 'Guinea-Bissau',
+      'SZ': 'Eswatini',
+      'MU': 'Mauritius',
+      'FJ': 'Fiji',
+      'CY': 'Cyprus',
+      'DJ': 'Djibouti',
+      'KM': 'Comoros',
+      'BH': 'Bahrain',
+      'TT': 'Trinidad and Tobago',
+      'EE': 'Estonia',
+      'TM': 'Turkmenistan',
+      'MV': 'Maldives',
+      'LU': 'Luxembourg',
+      'MT': 'Malta',
+      'BB': 'Barbados',
+      'BN': 'Brunei',
+      'IS': 'Iceland',
+      'VU': 'Vanuatu',
+      'ST': 'São Tomé and Príncipe',
+      'SM': 'San Marino',
+      'LI': 'Liechtenstein',
+      'AD': 'Andorra',
+      'MC': 'Monaco',
+      'NR': 'Nauru',
+      'TV': 'Tuvalu',
+      'VA': 'Vatican City'
       // Add more as needed
     };
     
