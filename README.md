@@ -774,6 +774,15 @@ if (error) {
 
 ## Changelog
 
+### 1.1.0
+- **BREAKING**: Simplified API - removed IP-based auto-detection
+- **BREAKING**: Changed `initialize(autoDetect, defaultCountry)` to `initialize(countryCode?)`
+- Added browser locale detection as fallback
+- Removed axios dependency (smaller bundle size)
+- Fixed CORS issues - now works perfectly in all browsers
+- Improved performance - no network calls required
+- Better user control over country selection
+
 ### 1.0.0
 - Initial release
 - Browser locale detection for country determination
