@@ -17,7 +17,7 @@ describe('CountryLocaleFormatter', () => {
 
   describe('initialization', () => {
     it('should initialize with manual country setting', async () => {
-      const countryInfo = await formatter.initialize(false, 'DE');
+      const countryInfo = await formatter.initialize( 'DE');
       
       expect(countryInfo).toBeDefined();
       expect(countryInfo.countryCode).toBe('DE');
@@ -38,7 +38,7 @@ describe('CountryLocaleFormatter', () => {
 
   describe('number formatting', () => {
     beforeEach(async () => {
-      await formatter.initialize(false, 'US');
+      await formatter.initialize( 'US');
     });
 
     it('should format numbers correctly', () => {
@@ -67,7 +67,7 @@ describe('CountryLocaleFormatter', () => {
 
   describe('different locales', () => {
     it('should format German numbers correctly', async () => {
-      await formatter.initialize(false, 'DE');
+      await formatter.initialize( 'DE');
       const result = formatter.formatNumber(1234.56);
       
       expect(result).toBeDefined();
@@ -76,7 +76,7 @@ describe('CountryLocaleFormatter', () => {
     });
 
     it('should format French currency correctly', async () => {
-      await formatter.initialize(false, 'FR');
+      await formatter.initialize( 'FR');
       const result = formatter.formatCurrency(1234.56);
       
       expect(result).toBeDefined();
@@ -85,7 +85,7 @@ describe('CountryLocaleFormatter', () => {
     });
 
     it('should format Japanese yen correctly', async () => {
-      await formatter.initialize(false, 'JP');
+      await formatter.initialize( 'JP');
       const result = formatter.formatCurrency(1234);
       
       expect(result).toBeDefined();
@@ -96,7 +96,7 @@ describe('CountryLocaleFormatter', () => {
 
   describe('number parsing', () => {
     beforeEach(async () => {
-      await formatter.initialize(false, 'US');
+      await formatter.initialize( 'US');
     });
 
     it('should parse US formatted numbers', () => {
