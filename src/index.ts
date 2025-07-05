@@ -7,7 +7,6 @@ export type {
   CountryInfo,
   NumberFormatConfig,
   FormattedNumber,
-  GeoLocationResponse,
   FormatType,
   FormatOptions
 } from './types';
@@ -37,14 +36,10 @@ export class CountryLocaleFormatter {
   }
 
   /**
-   * Initialize the formatter by detecting country
+   * Initialize the formatter with country code
    */
-  async initialize(autoDetect: boolean = true, defaultCountry: string = 'US'): Promise<CountryInfo> {
-    if (autoDetect) {
-      this.currentCountryInfo = await this.countryDetectionService.detectCountryFromIP();
-    } else {
-      this.currentCountryInfo = this.countryDetectionService.getCountryInfo(defaultCountry);
-    }
+  async initialize(countryCode?: string): Promise<CountryInfo> {
+    this.currentCountryInfo = this.countryDetectionService.setCountryByCode(countryCode);
     return this.currentCountryInfo;
   }
 

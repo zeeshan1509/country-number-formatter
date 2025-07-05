@@ -1,17 +1,18 @@
 # Country Number Formatter
 
-A TypeScript npm package that automatically detects a user's country and formats numbers, currencies, and percentages according to that country's locale conventions. Perfect for React applications that need internationalization (i18n) support.
+A TypeScript npm package that formats numbers, currencies, and percentages according to country-specific locale conventions. Perfect for React applications that need internationalization (i18n) support.
 
 ## Features
 
-- 🌍 **Automatic Country Detection**: Uses IP geolocation to detect user's country
+- 🌍 **Country-Based Formatting**: Formats numbers according to any country's locale conventions
 - 🔢 **Smart Number Formatting**: Formats numbers with correct decimal and thousand separators
 - 💰 **Currency Formatting**: Displays currency with proper symbols and formatting
 - 📊 **Percentage Formatting**: Handles percentage display according to locale
 - ⚛️ **React Integration**: Includes React hooks and components for easy integration
 - 🎯 **TypeScript Support**: Fully typed with comprehensive TypeScript definitions
 - 🚀 **Lightweight**: Minimal dependencies with efficient caching
-- 🔄 **Fallback Support**: Graceful fallbacks when detection fails
+- 🔄 **Fallback Support**: Graceful fallbacks using browser locale detection
+- 🏃‍♂️ **No CORS Issues**: Works perfectly in browsers without external API calls
 
 ## Installation
 
@@ -34,8 +35,14 @@ import { CountryLocaleFormatter } from 'country-number-formatter';
 
 const formatter = new CountryLocaleFormatter();
 
-// Initialize with auto-detection
+// Option 1: Use browser locale detection
 await formatter.initialize();
+
+// Option 2: Specify a country code
+await formatter.initialize('DE'); // Germany
+
+// Option 3: Change country later
+formatter.setCountry('FR'); // France
 
 // Format numbers
 const number = formatter.formatNumber(1234.56);
@@ -52,7 +59,7 @@ console.log(percent?.formatted); // "12.34%" (US) or "12,34 %" (DE)
 // Format numbers in strings (simple method)
 const text = "Price: 1234.56 and quantity: 100";
 
-// Use auto-detected country
+// Use current country (set during initialize or setCountry)
 const autoFormatted = formatter.formatNumbersInString(text, undefined, 2);
 
 // Use specific country
@@ -75,10 +82,10 @@ The package includes powerful string formatting methods that can find and format
 Use `formatNumbersInString()` when you just need the formatted string:
 
 ```typescript
-// Auto-detection (uses detected country)
+// Current country formatting (uses initialized country)
 const autoResult = formatter.formatNumbersInString(
   "Sales: 1234567.89 and costs: 999.5"
-  // No country code = uses auto-detected country
+  // No country code = uses current country
 );
 
 // Specific country formatting
@@ -174,10 +181,10 @@ const currency = formatter.formatCurrency(1234.56, {
   maximumFractionDigits: 2     // Max 2 decimal places
 });
 
-// Country detection and setting options
-await formatter.initialize(true, 'US');     // Auto-detect with US fallback
-await formatter.initialize(false, 'DE');    // Skip detection, use Germany
-formatter.setCountry('JP');                 // Change to Japan manually
+// Country setting options
+await formatter.initialize('DE');     // Use Germany
+await formatter.initialize();         // Use browser locale
+formatter.setCountry('JP');           // Change to Japan manually
 
 // Get current country
 const currentCountry = formatter.getCountryInfo();
@@ -206,7 +213,7 @@ function MyComponent() {
   // Simple string formatting
   const text = "Total: 1234.56 with tax: 123.45";
   
-  // Auto-detection (omit country code to use detected country)
+  // Auto-detection (omit country code to use current country)
   const autoFormattedText = formatNumbersInString(text, undefined, 2);
   
   // Specific country formatting
@@ -235,7 +242,7 @@ import {
 
 function App() {
   return (
-    <CountryFormatterProvider autoDetect={true}>
+    <CountryFormatterProvider defaultCountry="US">
       <div>
         <NumberDisplay value={1234.56} />
         <CurrencyDisplay value={1234.56} />
@@ -254,7 +261,7 @@ Main class for standalone usage.
 
 #### Methods
 
-- `initialize(autoDetect?: boolean, defaultCountry?: string): Promise<CountryInfo>`
+- `initialize(countryCode?: string): Promise<CountryInfo>`
 - `setCountry(countryCode: string): void`
 - `getCountryInfo(): CountryInfo | null`
 - `formatNumber(value: number, options?: FormatOptions): FormattedNumber | null`
@@ -293,7 +300,7 @@ const {
 
 ```typescript
 interface UseCountryFormatterOptions {
-  autoDetect?: boolean;        // Auto-detect country (default: true)
+  autoDetect?: boolean;        // Use browser locale detection (default: true)
   defaultCountry?: string;     // Fallback country code (default: 'US')
   onCountryDetected?: (countryInfo: CountryInfo) => void;
   onError?: (error: Error) => void;
@@ -628,14 +635,46 @@ function LocalizedApp() {
 
 ## Country Detection
 
-The package uses multiple IP geolocation services for reliable country detection:
+The package uses browser locale detection for reliable country determination:
 
-1. **ipapi.co** - Primary service
-2. **ipinfo.io** - Fallback service
-3. **ip-api.com** - Secondary fallback
-4. **Browser locale** - Final fallback
+1. **Browser Language** - Primary detection via `navigator.language`
+2. **Manual Override** - Direct country code specification
+3. **User Selection** - Allow users to choose their country
+4. **Fallback** - Default to 'US' if detection fails
 
-If all services fail, it falls back to browser locale or the specified default country.
+### **Recommended Approaches:**
+
+#### **1. Backend IP Detection** (Most Accurate)
+```javascript
+// Backend endpoint
+app.get('/api/country', (req, res) => {
+  const ip = req.ip;
+  // Use any IP detection service on your backend
+  const country = detectCountryFromIP(ip);
+  res.json({ countryCode: country });
+});
+
+// Frontend usage
+const response = await fetch('/api/country');
+const { countryCode } = await response.json();
+await formatter.initialize(countryCode);
+```
+
+#### **2. User Selection** (Best UX)
+```javascript
+// Let users choose their country
+const countrySelect = document.getElementById('country');
+countrySelect.addEventListener('change', (e) => {
+  formatter.setCountry(e.target.value);
+  updateNumbers();
+});
+```
+
+#### **3. Browser Locale** (Automatic)
+```javascript
+// Uses navigator.language to detect country
+await formatter.initialize(); // Automatic detection
+```
 
 ## Supported Countries
 
@@ -653,19 +692,19 @@ See the full list in `COUNTRY_LOCALE_MAP` and `COUNTRY_CURRENCY_MAP` constants.
 
 ```typescript
 // US formatting
-await formatter.initialize(false, 'US');
+await formatter.initialize('US');
 formatter.formatCurrency(1234.56); // "$1,234.56"
 
 // German formatting  
-await formatter.initialize(false, 'DE');
+await formatter.initialize('DE');
 formatter.formatCurrency(1234.56); // "1.234,56 €"
 
 // Japanese formatting
-await formatter.initialize(false, 'JP');
+await formatter.initialize('JP');
 formatter.formatCurrency(1234); // "¥1,234"
 
 // Indian formatting
-await formatter.initialize(false, 'IN');
+await formatter.initialize('IN');
 formatter.formatCurrency(1234.56); // "₹1,234.56"
 ```
 
@@ -697,11 +736,11 @@ The package includes comprehensive error handling:
 ```typescript
 const { error, countryInfo, formatNumber } = useCountryFormatter({
   onError: (error) => {
-    console.error('Country detection failed:', error);
+    console.error('Country setup failed:', error);
     // Handle error (e.g., show notification)
   },
   onCountryDetected: (country) => {
-    console.log('Detected country:', country);
+    console.log('Country set to:', country);
   }
 });
 
@@ -714,15 +753,16 @@ if (error) {
 ## Performance
 
 - **Caching**: Formatters and country info are cached for performance
-- **Lazy Loading**: Services are initialized only when needed
+- **No Network Calls**: All formatting done locally in browser
 - **Minimal Bundle**: Tree-shakeable exports keep bundle size small
-- **Debouncing**: Multiple rapid calls are optimized
+- **Fast Initialization**: Instant setup with browser locale detection
 
 ## Browser Support
 
 - Modern browsers with Intl.NumberFormat support
 - Node.js 14+
 - React 16.8+ (for React features)
+- No external API dependencies - works offline
 
 ## Contributing
 
@@ -736,11 +776,12 @@ if (error) {
 
 ### 1.0.0
 - Initial release
-- Country detection via IP geolocation
+- Browser locale detection for country determination
 - Number, currency, and percentage formatting
 - React hooks and components
 - TypeScript support
 - Comprehensive test suite
+- No external API dependencies
 
 ---
 
@@ -775,10 +816,11 @@ const result = formatCurrency(1234.56);
 
 ### Key Features
 - 🌍 **250+ Countries** - Complete international support
-- 🔍 **Auto Detection** - IP-based country detection
+- 🔍 **Browser Locale Detection** - Automatic country detection
 - ⚛️ **React Ready** - Hooks and components included
 - 📝 **String Processing** - Format numbers in text
 - 🎯 **TypeScript** - Full type safety
 - 🚀 **Production Ready** - Tested and optimized
+- 🏃‍♂️ **No CORS Issues** - Works perfectly in browsers
 
 **Need help?** Check the examples above or the demo files in the repository!

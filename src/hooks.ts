@@ -63,23 +63,23 @@ export function useCountryFormatter(
   const countryDetectionService = useMemo(() => CountryDetectionService.getInstance(), []);
   const numberFormatterService = useMemo(() => NumberFormatterService.getInstance(), []);
 
-  // Detect country on mount
+  // Set country on mount
   useEffect(() => {
     if (autoDetect) {
-      detectCountry();
+      detectCountry(defaultCountry);
     } else if (defaultCountry) {
-      const defaultInfo = countryDetectionService.getCountryInfo(defaultCountry);
+      const defaultInfo = countryDetectionService.setCountryByCode(defaultCountry);
       setCountryInfo(defaultInfo);
       onCountryDetected?.(defaultInfo);
     }
   }, [autoDetect, defaultCountry]);
 
-  const detectCountry = useCallback(async () => {
+  const detectCountry = useCallback(async (countryCode?: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const detected = await countryDetectionService.detectCountryFromIP();
+      const detected = countryDetectionService.setCountryByCode(countryCode || defaultCountry);
       setCountryInfo(detected);
       onCountryDetected?.(detected);
     } catch (err) {
@@ -127,14 +127,14 @@ export function useCountryFormatter(
   }, [countryInfo, numberFormatterService]);
 
   const setCountry = useCallback((countryCode: string) => {
-    const newCountryInfo = countryDetectionService.getCountryInfo(countryCode);
+    const newCountryInfo = countryDetectionService.setCountryByCode(countryCode);
     setCountryInfo(newCountryInfo);
     onCountryDetected?.(newCountryInfo);
   }, [countryDetectionService, onCountryDetected]);
 
   const refreshCountry = useCallback(async () => {
-    await detectCountry();
-  }, [detectCountry]);
+    await detectCountry(countryInfo?.countryCode);
+  }, [detectCountry, countryInfo]);
 
   const getFormattingInfo = useCallback(() => {
     if (!countryInfo) return null;

@@ -119,7 +119,6 @@ export class NumberFormatterService {
       const parsed = parseFloat(cleanValue);
       return isNaN(parsed) ? null : parsed;
     } catch (error) {
-      console.error('Error parsing number:', error);
       return null;
     }
   }
@@ -151,7 +150,6 @@ export class NumberFormatterService {
       }
     } catch (error) {
       // Use defaults if detection fails
-      console.warn('Could not detect separators, using defaults');
     }
 
     return { decimal, thousand };

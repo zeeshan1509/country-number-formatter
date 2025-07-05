@@ -1,11 +1,11 @@
-import axios from 'axios';
-import { CountryInfo, GeoLocationResponse } from './types';
+import { CountryInfo } from './types';
 import { COUNTRY_LOCALE_MAP, COUNTRY_CURRENCY_MAP, DEFAULT_LOCALE, DEFAULT_CURRENCY } from './constants';
 
 export class CountryDetectionService {
   private static instance: CountryDetectionService;
   private cache: Map<string, CountryInfo> = new Map();
   private defaultCountryInfo: CountryInfo;
+  private currentCountryInfo: CountryInfo | null = null;
 
   constructor() {
     this.defaultCountryInfo = {
@@ -24,124 +24,50 @@ export class CountryDetectionService {
   }
 
   /**
-   * Detect country from IP address using multiple fallback services
+   * Set country by country code (provided from frontend)
    */
-  async detectCountryFromIP(): Promise<CountryInfo> {
-    try {
-      // Try multiple IP geolocation services for better reliability
-      const services = [
-        () => this.detectFromIPAPI(),
-        () => this.detectFromIPInfo(),
-        () => this.detectFromIPGeolocation()
-      ];
-
-      for (const service of services) {
-        try {
-          const result = await service();
-          if (result) {
-            this.cache.set('current', result);
-            return result;
-          }
-        } catch (error) {
-          console.warn('IP detection service failed:', error);
-          continue;
-        }
-      }
-
-      // If all services fail, return browser locale or default
-      return this.detectFromBrowserLocale();
-    } catch (error) {
-      console.error('Country detection failed:', error);
-      return this.detectFromBrowserLocale();
-    }
+  public setCountryByCode(countryCode?: string): CountryInfo {
+    const finalCountryCode = countryCode || this.detectFromBrowserLocale().countryCode;
+    const countryInfo = this.createCountryInfo(finalCountryCode);
+    
+    this.currentCountryInfo = countryInfo;
+    this.cache.set('current', countryInfo);
+    
+    console.log(`🌍 Country set to: ${countryInfo.countryCode} (${countryInfo.countryName})`);
+    return countryInfo;
   }
 
   /**
-   * Detect country using ipapi.co (free service)
-   */
-  private async detectFromIPAPI(): Promise<CountryInfo | null> {
-    try {
-      const response = await axios.get('https://ipapi.co/json/', {
-        timeout: 5000,
-        headers: {
-          'User-Agent': 'country-number-formatter/1.0.0'
-        }
-      });
-
-      const data = response.data;
-      if (data.country_code) {
-        return this.createCountryInfo(data.country_code, data.country_name, data.currency);
-      }
-    } catch (error) {
-      throw new Error('ipapi.co service failed');
-    }
-    return null;
-  }
-
-  /**
-   * Detect country using ipinfo.io (free tier available)
-   */
-  private async detectFromIPInfo(): Promise<CountryInfo | null> {
-    try {
-      const response = await axios.get('https://ipinfo.io/json', {
-        timeout: 5000,
-        headers: {
-          'User-Agent': 'country-number-formatter/1.0.0'
-        }
-      });
-
-      const data = response.data;
-      if (data.country) {
-        return this.createCountryInfo(data.country, data.country, undefined);
-      }
-    } catch (error) {
-      throw new Error('ipinfo.io service failed');
-    }
-    return null;
-  }
-
-  /**
-   * Detect country using ip-api.com (free service)
-   */
-  private async detectFromIPGeolocation(): Promise<CountryInfo | null> {
-    try {
-      const response = await axios.get('http://ip-api.com/json/', {
-        timeout: 5000,
-        headers: {
-          'User-Agent': 'country-number-formatter/1.0.0'
-        }
-      });
-
-      const data = response.data;
-      if (data.countryCode && data.status === 'success') {
-        return this.createCountryInfo(data.countryCode, data.country, data.currency);
-      }
-    } catch (error) {
-      throw new Error('ip-api.com service failed');
-    }
-    return null;
-  }
-
-  /**
-   * Fallback to browser locale detection
+   * Fallback to browser locale detection (no IP required)
    */
   private detectFromBrowserLocale(): CountryInfo {
     if (typeof window !== 'undefined' && window.navigator) {
-      const locale = window.navigator.language || 'en-US';
+      // Try multiple navigator properties for better detection
+      const locale = window.navigator.language || 
+                    (window.navigator as any).userLanguage || 
+                    (window.navigator as any).browserLanguage || 
+                    'en-US';
+      
       const countryCode = locale.split('-')[1] || 'US';
       
-      return this.createCountryInfo(countryCode.toUpperCase(), '', undefined);
+      console.log(`🌍 Browser locale detected: ${locale} → Country: ${countryCode}`);
+      return this.createCountryInfo(countryCode.toUpperCase());
     }
     
+    console.log('🌍 Using default country: US');
     return this.defaultCountryInfo;
   }
 
   /**
    * Get country info by country code
    */
-  getCountryInfo(countryCode: string): CountryInfo {
-    const upperCode = countryCode.toUpperCase();
-    return this.createCountryInfo(upperCode, '', undefined);
+  public getCountryInfo(countryCode?: string): CountryInfo {
+    if (countryCode) {
+      const upperCode = countryCode.toUpperCase();
+      return this.createCountryInfo(upperCode);
+    }
+    
+    return this.currentCountryInfo || this.defaultCountryInfo;
   }
 
   /**
