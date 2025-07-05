@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Locale Formatter Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Country-Based Number Formatting Demo</h1>
+        <div id="root">
+            <div class="loading">Loading React app...</div>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        // This is a simplified version for testing
+        // In a real implementation, you would import from the built modules
+        
+        const { useState, useEffect, useCallback, useMemo } = React;
+        
+        // Real IP-based country detection
+        async function detectCountryFromIP() {
+            try {
+                // Try ipapi.co first
+                const response = await fetch('https://ipapi.co/json/');
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.country_code || 'US';
+                }
+                throw new Error('ipapi.co failed');
+            } catch (error) {
+                try {
+                    // Fallback to ip-api.com
+                    const response = await fetch('http://ip-api.com/json/');
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.countryCode || 'US';
+                    }
+                    throw new Error('ip-api.com failed');
+                } catch (fallbackError) {
+                    try {
+                        // Second fallback to ipinfo.io
+                        const response = await fetch('https://ipinfo.io/json');
+                        if (response.ok) {
+                            const data = await response.json();
+                            return data.country || 'US';
+                        }
+                        throw new Error('ipinfo.io failed');
+                    } catch (finalError) {
+                        console.warn('All IP detection services failed, using default US');
+                        return 'US';
+                    }
+                }
+            }
+        }
+
+        // Simple mock formatter for demo
+        function mockFormatNumber(value, country = 'US', decimalPlaces) {
+            const options = {};
+            if (decimalPlaces !== undefined) {
+                options.minimumFractionDigits = decimalPlaces;
+                options.maximumFractionDigits = decimalPlaces;
+            }
+            
+            const localeMap = {
+                'US': 'en-US',
+                'DE': 'de-DE', 
+                'FR': 'fr-FR',
+                'IN': 'en-IN',
+                'JP': 'ja-JP',
+                'CH': 'de-CH'
+            };
+            
+            return new Intl.NumberFormat(localeMap[country] || 'en-US', options).format(value);
+        }
+
+        function mockFormatStringNumbers(inputString, countryCode = 'US', decimalPlaces) {
+            const numberRegex = /\b\d+\.?\d*\b/g;
+            
+            let formattedString = inputString;
+            let offset = 0;
+            
+            const matches = Array.from(inputString.matchAll(numberRegex));
+            
+            for (const match of matches) {
+                const originalNumberStr = match[0];
+                const position = match.index;
+                
+                const parsedNumber = parseFloat(originalNumberStr);
+                
+                if (!isNaN(parsedNumber)) {
+                    const formatted = mockFormatNumber(parsedNumber, countryCode, decimalPlaces);
+                    
+                    const beforeReplacement = formattedString.substring(0, position + offset);
+                    const afterReplacement = formattedString.substring(position + offset + originalNumberStr.length);
+                    formattedString = beforeReplacement + formatted + afterReplacement;
+                    
+                    offset += formatted.length - originalNumberStr.length;
+                }
+            }
+            
+            return formattedString;
+        }
+
+        // Demo Component
+        function StringFormattingDemo() {
+            const [inputString, setInputString] = useState("hello 12345 this is my string can 46893.344 you fix this");
+            const [selectedCountry, setSelectedCountry] = useState('auto');
+            const [decimalPlaces, setDecimalPlaces] = useState(undefined);
+            const [detectedCountry, setDetectedCountry] = useState('US'); // Default while detecting
+            const [isDetecting, setIsDetecting] = useState(true);
+
+            // Real country detection
+            React.useEffect(() => {
+                async function performDetection() {
+                    setIsDetecting(true);
+                    try {
+                        const country = await detectCountryFromIP();
+                        setDetectedCountry(country);
+                        console.log('Detected country:', country);
+                    } catch (error) {
+                        console.error('Country detection failed:', error);
+                        setDetectedCountry('US'); // Fallback
+                    } finally {
+                        setIsDetecting(false);
+                    }
+                }
+                
+                performDetection();
+            }, []);
+
+            const countryToUse = selectedCountry === 'auto' ? detectedCountry : selectedCountry;
+
+            const simpleResult = useMemo(() => {
+                return mockFormatStringNumbers(inputString, countryToUse, decimalPlaces);
+            }, [inputString, countryToUse, decimalPlaces]);
+
+            return (
+                <div style={{ border: '1px solid #ddd', padding: '16px', marginTop: '20px', borderRadius: '8px' }}>
+                    <h3>String Number Formatting Demo</h3>
+                    
+                    <div style={{ marginBottom: '12px' }}>
+                        <label>Input String:</label>
+                        <textarea
+                            value={inputString}
+                            onChange={(e) => setInputString(e.target.value)}
+                            style={{ width: '100%', minHeight: '60px', margin: '4px 0', padding: '8px' }}
+                            placeholder="Enter a string with numbers..."
+                        />
+                    </div>
+                    
+                    <div style={{ marginBottom: '12px', display: 'flex', gap: '16px', alignItems: 'center' }}>
+                        <div>
+                            <label>Country: </label>
+                            <select 
+                                value={selectedCountry}
+                                onChange={(e) => setSelectedCountry(e.target.value)}
+                                style={{ padding: '4px' }}
+                            >
+                                <option value="auto">
+                                    Auto ({isDetecting ? 'Detecting...' : `Detected: ${detectedCountry}`})
+                                </option>
+                                <option value="US">US - United States</option>
+                                <option value="CH">CH - Switzerland</option>
+                                <option value="DE">DE - Germany</option>
+                                <option value="FR">FR - France</option>
+                                <option value="JP">JP - Japan</option>
+                                <option value="IN">IN - India</option>
+                            </select>
+                        </div>
+                        
+                        {/* Detection Status Indicator */}
+                        {selectedCountry === 'auto' && (
+                            <div style={{ 
+                                padding: '4px 8px', 
+                                borderRadius: '4px', 
+                                fontSize: '12px',
+                                backgroundColor: isDetecting ? '#fff3cd' : '#d4edda',
+                                color: isDetecting ? '#856404' : '#155724',
+                                border: `1px solid ${isDetecting ? '#ffeaa7' : '#c3e6cb'}`
+                            }}>
+                                {isDetecting ? '🔍 Detecting your location...' : `🌍 Detected: ${detectedCountry}`}
+                            </div>
+                        )}
+                        
+                        <div>
+                            <label>Decimal Places: </label>
+                            <select 
+                                value={decimalPlaces?.toString() || 'auto'}
+                                onChange={(e) => setDecimalPlaces(e.target.value === 'auto' ? undefined : parseInt(e.target.value))}
+                                style={{ padding: '4px' }}
+                            >
+                                <option value="auto">Auto (keep original)</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style={{ backgroundColor: '#e8f5e8', padding: '12px', borderRadius: '4px', marginBottom: '16px' }}>
+                        <h4 style={{ margin: '0 0 8px 0', color: '#2e7d32' }}>✨ Simple Method Result</h4>
+                        <div style={{ marginBottom: '8px' }}>
+                            <strong>Original:</strong> <code>{inputString}</code>
+                        </div>
+                        <div style={{ marginBottom: '8px' }}>
+                            <strong>Formatted:</strong> <code style={{ color: '#2196f3' }}>{simpleResult}</code>
+                        </div>
+                        <div style={{ marginBottom: '8px' }}>
+                            <strong>Country Used:</strong> <code>{countryToUse}</code> 
+                            {selectedCountry === 'auto' && (
+                                <span style={{ color: '#666' }}>
+                                    {isDetecting ? ' (Detecting...)' : ' (Auto-detected)'}
+                                </span>
+                            )}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                            This demonstrates the <code>formatNumbersInString</code> method that returns only the formatted string.
+                        </div>
+                    </div>
+                    
+                    <div style={{ backgroundColor: '#f0f7ff', padding: '12px', borderRadius: '4px' }}>
+                        <h4 style={{ margin: '0 0 8px 0', color: '#1976d2' }}>📝 Usage Examples</h4>
+                        <div style={{ fontFamily: 'monospace', fontSize: '14px', lineHeight: '1.5' }}>
+                            <div><strong>Node.js:</strong></div>
+                            <div style={{ backgroundColor: '#f5f5f5', padding: '8px', margin: '4px 0', borderRadius: '4px' }}>
+                                <code>const result = formatter.formatNumbersInString(text, 'DE', 2);</code>
+                            </div>
+                            <div><strong>React Hook:</strong></div>
+                            <div style={{ backgroundColor: '#f5f5f5', padding: '8px', margin: '4px 0', borderRadius: '4px' }}>
+                                <code>const &#123; formatNumbersInString &#125; = useCountryFormatter();</code><br/>
+                                <code>const result = formatNumbersInString(text, 'DE', 2);</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            return (
+                <div>
+                    <div style={{ backgroundColor: '#e3f2fd', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
+                        <h2 style={{ margin: '0 0 8px 0', color: '#1565c0' }}>🎉 New Feature: Simple String Formatting</h2>
+                        <p style={{ margin: '0', color: '#1976d2' }}>
+                            The <code>formatNumbersInString</code> method now returns only the formatted string, 
+                            perfect for simple use cases where you don't need metadata about the replacements.
+                        </p>
+                        <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#1976d2' }}>
+                            🌐 <strong>Real IP Detection:</strong> This demo uses actual IP geolocation services to detect your country automatically!
+                        </p>
+                    </div>
+                    
+                    <StringFormattingDemo />
+                    
+                    <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
+                        <h3>✅ Complete Implementation</h3>
+                        <p>This demo shows the new simplified string formatting feature that:</p>
+                        <ul>
+                            <li>✨ Returns only the formatted string (no extra metadata)</li>
+                            <li>🌍 Works with any country code</li>
+                            <li>🔢 Supports optional decimal place control</li>
+                            <li>⚛️ Available in both Node.js and React contexts</li>
+                            <li>🎯 Perfect for simple use cases</li>
+                            <li>🌐 <strong>Real IP Detection:</strong> Uses actual geolocation services (ipapi.co, ip-api.com, ipinfo.io)</li>
+                        </ul>
+                        <p><strong>The feature has been successfully added to both the main class and React hook!</strong></p>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

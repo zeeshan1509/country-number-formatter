@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IP Detection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>IP Detection Services Test</h1>
+    <div id="results"></div>
+
+    <script>
+        async function testIPServices() {
+            const resultsDiv = document.getElementById('results');
+            
+            // Test ipapi.co
+            try {
+                resultsDiv.innerHTML += '<div class="result">Testing ipapi.co...</div>';
+                const response1 = await fetch('https://ipapi.co/json/');
+                const data1 = await response1.json();
+                resultsDiv.innerHTML += `<div class="result success">✅ ipapi.co: ${data1.country_code} (${data1.country_name})</div>`;
+            } catch (error) {
+                resultsDiv.innerHTML += `<div class="result error">❌ ipapi.co failed: ${error.message}</div>`;
+            }
+
+            // Test ip-api.com (Note: This might not work due to HTTPS/HTTP mixed content)
+            try {
+                resultsDiv.innerHTML += '<div class="result">Testing ip-api.com...</div>';
+                const response2 = await fetch('http://ip-api.com/json/');
+                const data2 = await response2.json();
+                resultsDiv.innerHTML += `<div class="result success">✅ ip-api.com: ${data2.countryCode} (${data2.country})</div>`;
+            } catch (error) {
+                resultsDiv.innerHTML += `<div class="result error">❌ ip-api.com failed: ${error.message}</div>`;
+            }
+
+            // Test ipinfo.io
+            try {
+                resultsDiv.innerHTML += '<div class="result">Testing ipinfo.io...</div>';
+                const response3 = await fetch('https://ipinfo.io/json');
+                const data3 = await response3.json();
+                resultsDiv.innerHTML += `<div class="result success">✅ ipinfo.io: ${data3.country} (${data3.city}, ${data3.region})</div>`;
+            } catch (error) {
+                resultsDiv.innerHTML += `<div class="result error">❌ ipinfo.io failed: ${error.message}</div>`;
+            }
+        }
+
+        // Run tests when page loads
+        testIPServices();
+    </script>
+</body>
+</html>
