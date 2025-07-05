@@ -1,7 +1,7 @@
 const { CountryLocaleFormatter } = require('./dist/index.js');
 
 async function demo() {
-  console.log('🌍 Country Locale Formatter Demo\n');
+  console.log('🌍 Country Number Formatter Demo\n');
   
   const formatter = new CountryLocaleFormatter();
   

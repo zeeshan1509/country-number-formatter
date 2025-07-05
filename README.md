@@ -1,4 +1,4 @@
-# Country Locale Formatter
+# Country Number Formatter
 
 A TypeScript npm package that automatically detects a user's country and formats numbers, currencies, and percentages according to that country's locale conventions. Perfect for React applications that need internationalization (i18n) support.
 
@@ -16,7 +16,7 @@ A TypeScript npm package that automatically detects a user's country and formats
 ## Installation
 
 ```bash
-npm install country-locale-formatter
+npm install country-number-formatter
 ```
 
 For React usage, ensure you have React 16.8+ installed:
@@ -30,7 +30,7 @@ npm install react@^16.8.0
 ### Standalone Usage
 
 ```typescript
-import { CountryLocaleFormatter } from 'country-locale-formatter';
+import { CountryLocaleFormatter } from 'country-number-formatter';
 
 const formatter = new CountryLocaleFormatter();
 
@@ -186,7 +186,7 @@ const currentCountry = formatter.getCountryInfo();
 ### React Hook Usage
 
 ```tsx
-import { useCountryFormatter } from 'country-locale-formatter/react';
+import { useCountryFormatter } from 'country-number-formatter/react';
 
 function MyComponent() {
   const { 
@@ -231,7 +231,7 @@ import {
   CurrencyDisplay, 
   NumberDisplay,
   PercentDisplay 
-} from 'country-locale-formatter/react';
+} from 'country-number-formatter/react';
 
 function App() {
   return (
@@ -732,10 +732,6 @@ if (error) {
 4. Ensure all tests pass
 5. Submit a pull request
 
-## License
-
-MIT License - see LICENSE file for details.
-
 ## Changelog
 
 ### 1.0.0
@@ -752,7 +748,7 @@ MIT License - see LICENSE file for details.
 
 ### Installation
 ```bash
-npm install country-locale-formatter
+npm install country-number-formatter
 ```
 
 ### Basic Usage

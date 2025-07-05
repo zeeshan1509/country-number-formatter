@@ -64,7 +64,7 @@ export class CountryDetectionService {
       const response = await axios.get('https://ipapi.co/json/', {
         timeout: 5000,
         headers: {
-          'User-Agent': 'country-locale-formatter/1.0.0'
+          'User-Agent': 'country-number-formatter/1.0.0'
         }
       });
 
@@ -86,7 +86,7 @@ export class CountryDetectionService {
       const response = await axios.get('https://ipinfo.io/json', {
         timeout: 5000,
         headers: {
-          'User-Agent': 'country-locale-formatter/1.0.0'
+          'User-Agent': 'country-number-formatter/1.0.0'
         }
       });
 
@@ -108,7 +108,7 @@ export class CountryDetectionService {
       const response = await axios.get('http://ip-api.com/json/', {
         timeout: 5000,
         headers: {
-          'User-Agent': 'country-locale-formatter/1.0.0'
+          'User-Agent': 'country-number-formatter/1.0.0'
         }
       });
 

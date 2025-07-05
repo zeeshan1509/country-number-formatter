@@ -284,7 +284,7 @@ function App() {
       fallback={<div>Loading country information...</div>}
     >
       <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-        <h1>Country Locale Formatter Demo</h1>
+        <h1>Country Number Formatter Demo</h1>
         
         {/* Country Info Display */}
         <CountryInfo style={{ 

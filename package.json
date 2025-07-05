@@ -1,5 +1,5 @@
 {
-  "name": "country-locale-formatter",
+  "name": "country-number-formatter",
   "version": "1.0.0",
   "description": "A TypeScript package that detects user's country and formats numbers according to local conventions",
   "main": "dist/index.js",
@@ -56,11 +56,10 @@
     "react",
     "typescript"
   ],
-  "author": "Your Name",
-  "license": "MIT",
+  "author": "Zeeshan Rabbani",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/country-locale-formatter.git"
+    "url": "https://github.com/zeeshan1509/country-number-formatter.git"
   },
   "devDependencies": {
     "@types/jest": "^29.5.8",

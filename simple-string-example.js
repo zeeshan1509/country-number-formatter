@@ -1,4 +1,4 @@
-const { CountryLocaleFormatter } = require('country-locale-formatter');
+const { CountryLocaleFormatter } = require('country-number-formatter');
 
 // Simple usage example
 async function formatStringExample() {
